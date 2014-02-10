@@ -1,0 +1,7 @@
+*.txt
+b_cpu
+b_gpu
+intelligent/*
+market/*
+thrust_cpu
+thrust_gpu
