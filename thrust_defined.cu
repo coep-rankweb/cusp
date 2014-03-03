@@ -6,6 +6,7 @@
 #include <cusp/multiply.h>
 #include <cusp/transpose.h>
 #include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
 #include <thrust/transform.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,6 +50,7 @@ typedef array1d <double, device_memory> ARR1D_GPU;
 void read_matrix(CAST(COO) &temp, const char *fname) {
 	// Reads web matrix from market file
 	io::read_matrix_market_file(temp, fname);
+	//print(temp);
 	fprintf(stderr, "Read the matrix\n");
 
 	// Link Matrix (Transpose of Web Matrix)
@@ -70,10 +72,10 @@ __host__ __device__ T operator()(const T& x)const{
 
 void normalize(CAST(COO) &adj, CAST(ARR1D) &inv_sum) {
 
-	host_vector<double> in_keys(adj.values.size()); //cols
-	host_vector<double> in_values(adj.values.size());	//val
-	host_vector<double> out_keys(adj.num_rows);	//cols
-	host_vector<double> out_values(adj.num_rows, 1); //sum
+	device_vector<double> in_keys(adj.values.size()); //cols
+	device_vector<double> in_values(adj.values.size());	//val
+	device_vector<double> out_keys(adj.num_rows);	//cols
+	device_vector<double> out_values(adj.num_rows, 1); //sum
 
 
 	/*
@@ -97,8 +99,7 @@ void normalize(CAST(COO) &adj, CAST(ARR1D) &inv_sum) {
 	reduce_by_key(in_keys.begin(), in_keys.end(), in_values.begin(), out_keys.begin(), out_values.begin(), binary_pred, binary_op);
 
 	fprintf(stderr, "Row sum calculated\n");
-	/*
-	cout << "INKEY\tINVAL =====================\n";
+	/*cout << "INKEY\tINVAL =====================\n";
 	for(int i = 0; i < in_keys.size(); i++)
 			cout << in_keys[i] << "\t" << in_values[i] << endl;
 
@@ -113,6 +114,9 @@ void normalize(CAST(COO) &adj, CAST(ARR1D) &inv_sum) {
 	thrust::transform(out_values.begin(), out_values.end(), out_values.begin(), invert);
 
 	thrust::copy(out_values.begin(), out_values.end(), inv_sum.begin());
+
+	//cout << "INVERSE SUM" << endl;
+	//print(inv_sum);
 	
 	CAST(COO) link_mat = adj;
 	transpose(adj, link_mat);
@@ -135,9 +139,20 @@ void normalize(CAST(COO) &adj, CAST(ARR1D) &inv_sum) {
 	dia.diagonal_offsets[0] = 0;
 	for(int i = 0; i < out_keys.size(); i++)
 			dia.values(i, 0) = 1;
-	for(int i = 0; i < out_keys.size(); i++)
+	for(int i = 0; i < out_keys.size(); i++) {
+			//cout << i << "\t" << out_keys[i] << "\t" << inv_sum[i] << endl;
 			dia.values(out_keys[i], 0) = inv_sum[i];
+	}
+
+
+	/*
+		For some reason, the 0th entry in the diagonal is not being set in the above for loop. Therefore, this hack manually sets the first entry in the diagonal.
+	*/
+	dia.values(0, 0) = inv_sum[0];
+
 	fprintf(stderr, "Formed dia_mat.\n");
+
+	//print(dia);
 
 	if(is_valid_matrix(adj)) {
 		multiply(adj, dia, link_mat);	// link_mat = adj * dia
@@ -176,13 +191,42 @@ void pagerank(CAST(COO) &link, double beta, CAST(ARR1D) &rank) {
 		#ifndef CPU
 				cudaThreadSynchronize();
 		#endif
+		//cout << "==============" << i << "================" << endl;
+		//print(rank);
 	}
 }
 
 void print_array(CAST(ARR1D) rank) {
 
 	for (int i = 0; i < rank.size(); i++)
-		printf ("%.10lf\n", rank[i]);
+		//printf ("%.10lf\n", rank[i]);
+		cout << setprecision(10) << rank[i] << endl;
+}
+
+void check_normalized(CAST(COO) adj) {
+	double sum[350045];
+	int nodes = 350045;
+	int i;
+
+	cout << "CHECK NORMALIZED" << endl;
+	for(i = 0; i < nodes; i++) sum[i] = 0.0;
+	
+	for(i = 0; i < adj.num_entries; i++)
+		sum[adj.column_indices[i]] += adj.values[i];
+
+	for(i = 0; i < nodes; i++)
+		cout << sum[i] << endl;
+
+
+	/*
+	for(int i = 0; i < adj.num_rows; i++) {
+		vec.row_indices[i] = 0;
+		vec.column_indices[i] = i;
+		vec.values[i] = 1;
+	}
+
+	multiply(vec, adj, sum);
+	print(sum);*/
 }
 
 
@@ -195,13 +239,18 @@ int main(int argc, char **argv) {
 	CAST(ARR1D) inv_sum(adj.num_rows);
 	normalize(adj, inv_sum);
 
+	//cout << "NORMALIZED ADJ===============" << endl;
+	//print(adj);
+
+	check_normalized(adj);
+
 	//print(adj);
 	//cout << "INVERSE ===============" << endl;
 	//print(inv_sum);
 
-	pagerank(adj, 0.85, rank);
+	pagerank(adj, atof(argv[2]), rank);
 
-	//print(rank);
-	print_array(rank);
+	print(rank);
+	//print_array(rank);
 	return 0;
 }

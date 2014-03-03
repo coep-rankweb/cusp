@@ -6,3 +6,6 @@ similarity.o: similarity.cpp defines.h
 	g++ -c similarity.cpp
 clean:
 	rm -f *.o
+
+mongo:
+	g++ test_mongo.cpp -pthread -lmongoclient -lboost_thread-mt -lboost_filesystem -lboost_program_options -lboost_system
