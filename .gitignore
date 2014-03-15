@@ -4,3 +4,5 @@ market/*
 a.out
 *_cpu
 *_gpu
+*_gpu_dia
+*_gpu_rank
