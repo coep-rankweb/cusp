@@ -144,15 +144,16 @@ void normalize(CAST(COO) &adj, CAST(ARR1D) &inv_sum) {
 			dia.values(out_keys[i], 0) = inv_sum[i];
 	}
 
+	cout << "DIA ==========\n";
+	print(dia);
 
 	/*
 		For some reason, the 0th entry in the diagonal is not being set in the above for loop. Therefore, this hack manually sets the first entry in the diagonal.
 	*/
-	dia.values(0, 0) = inv_sum[0];
+	//dia.values(0, 0) = inv_sum[0];
 
 	fprintf(stderr, "Formed dia_mat.\n");
 
-	//print(dia);
 
 	if(is_valid_matrix(adj)) {
 		multiply(adj, dia, link_mat);	// link_mat = adj * dia
@@ -242,15 +243,15 @@ int main(int argc, char **argv) {
 	//cout << "NORMALIZED ADJ===============" << endl;
 	//print(adj);
 
-	check_normalized(adj);
+	//check_normalized(adj);
 
 	//print(adj);
 	//cout << "INVERSE ===============" << endl;
 	//print(inv_sum);
 
-	pagerank(adj, atof(argv[2]), rank);
+	//pagerank(adj, atof(argv[2]), rank);
 
-	print(rank);
+	//print(rank);
 	//print_array(rank);
 	return 0;
 }
