@@ -9,3 +9,8 @@ clean:
 
 mongo:
 	g++ test_mongo.cpp -pthread -lmongoclient -lboost_thread-mt -lboost_filesystem -lboost_program_options -lboost_system
+
+test_similarity:
+	g++ -c similarity.cpp
+	g++ similarity.o porter.o -lhiredis -o chuck_norris
+	./chuck_norris

@@ -84,9 +84,6 @@ void build_query(COO_CPU &query_vec, vector<int> &tokens) {
 void get_subgraph(COO_CPU &subgraph_matrix, vector<int> &tokens, vector<int> &induced_urls) {
 	vector<int> base_urls;
 
-	/*
-	TODO sort the url set by pagerank
-	*/
 	get_base_url_set(tokens, base_urls, BASE_URL_SIZE);
 	print_vector(base_urls);
 	return;
