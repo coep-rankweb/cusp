@@ -2,6 +2,8 @@
 intelligent/*
 market/*
 a.out
+query_proc/a.out
+query_proc/*.o
 *_cpu
 *_gpu
 *_gpu_dia
