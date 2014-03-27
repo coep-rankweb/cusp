@@ -1,6 +1,6 @@
 FILE = web
-FPATH = ~/Documents/save_11_03/$(FILE).mtx
-#FPATH = ~/kernel_panic/core/spyder/data/$(FILE).mtx
+#FPATH = ~/Documents/save_11_03/$(FILE).mtx
+FPATH = ~/kernel_panic/core/spyder/data/$(FILE).mtx
 #FILE = simple
 #FPATH = market/$(FILE).mtx
 STATS = stats_$(FILE)
@@ -12,7 +12,7 @@ gpu:
 	nvcc -arch=sm_20 thrust_defined.cu -o thrust_gpu
 	time ./thrust_gpu $(ARGS) >> b_gpu_dia
 new_gpu:
-	nvcc -arch=sm_20 diag.cu -o thrust_gpu
+	#nvcc -arch=sm_20 diag.cu -o thrust_gpu
 	time ./thrust_gpu $(ARGS) > a_gpu
 new_cpu:
 	nvcc diag.cu -DCPU -o thrust_cpu

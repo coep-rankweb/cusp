@@ -115,6 +115,42 @@ void normalize(COO_CPU &relevance_mat) {
 	relevance_mat = temp;
 }
 
+int main() {
+	MongoDB mongo;
+	vector<Tuple> url_rank;
+	vector<string> tokens;
+	vector<string> names;
+	set<int> induced;
+	string query;
+	char web_graph_file[] = "/home/nvdia/kernel_panic/core/spyder/data/web.mtx";
+
+	COO_CPU adj;
+	read_matrix(adj, web_graph_file);
+
+	int word_count = mongo.get_word_count();
+	int url_count = mongo.get_url_count();
+
+	while(1) {
+		url_rank.clear();
+		names.clear();
+		tokens.clear();
+		std::getline(cin, query);
+		if(query.compare("q") == 0) break;
+
+		get_query_words(tokens, query);
+
+		mongo.get_urls_from_words(tokens, url_rank, "in_title");
+		mongo.get_induced_url_set(url_rank, induced);
+		mongo.get_urls_from_ids(url_rank, names);
+
+		cout << "url size: " << url_rank.size() << endl;
+		print_vector(names);
+		cout << "\n==========================\n\n";
+	}
+	return 0;
+}
+
+/*
 int main(int argc, char *argv[]) {
 	string query;
 	vector<int> tokens;
@@ -148,4 +184,6 @@ int main(int argc, char *argv[]) {
 	normalize(relevance_mat);
 
 	return 0;
-}
+}*/
+
+

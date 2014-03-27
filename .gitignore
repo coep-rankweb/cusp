@@ -9,3 +9,6 @@ query_proc/*.o
 *_gpu_dia
 *_gpu_rank
 row_sum
+server/static/images
+*.swp
+query_proc/*.swp

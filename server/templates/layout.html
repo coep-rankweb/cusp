@@ -1,0 +1,97 @@
+<html>
+<style>
+body {
+	padding: 60px;
+	font-family: sans-serif;
+}
+
+input[type="text"] {
+	padding: 6px;
+	border: 2px solid gray;
+	border-radius: 3px;
+	outline: 0 none;
+	margin: 0;
+	width: 500px;
+	transition: border-color 0.2s linear;
+	height: 30px;
+}
+
+input[type="text"]:FOCUS {
+	border-color: #0bf;
+}
+
+input[type="submit"] {
+	background-color: rgb(0, 128, 0);
+	background-image: url("/static/images/search.svg");
+	background-position: 10px;
+	cursor: pointer;
+	width: 50px;
+	height: 30px;
+	margin: 0;
+	background-cover: cover;
+	background-repeat: no-repeat;*/
+	color: white;
+	border-radius: 3px;
+	padding: 5px 10px;
+	border: none;
+	transition: background-color 0.2s linear;
+	outline: 0 none;
+}
+
+.search_image {
+	width: 25px;
+	height: 25px;
+}
+
+input[type="submit"]:HOVER, input[type="submit"]:FOCUS {
+	background-color: rgb(0, 200, 0);
+}
+
+input[type="submit"]:ACTIVE {
+	background-color: rgb(0, 100, 0);
+}
+
+ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+ul li a {
+	font-size: 20px;
+	color: rgb(30, 15, 190);
+	letter-spacing: 1px;
+	text-decoration: none;
+}
+
+ul li a:HOVER {
+	text-decoration: underline;
+}
+
+ul li a:ACTIVE {
+	color: red;
+}
+
+ul li {
+	margin: 30px 0;
+}
+
+.url {
+	color: green;
+	margin-top: 5px;
+}
+
+.search-form {
+	/*width: 250px;
+	margin: 0 auto;*/
+}
+
+</style>
+<body>
+{% block content %}
+{% endblock %}
+<script src="/static/js/jquery-1.11.0.js"></script>
+{% block js %}
+{% endblock %}
+</body>
+</html>
