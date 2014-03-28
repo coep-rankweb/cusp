@@ -1,16 +1,19 @@
-a.out: porter.o similarity.o home.cu defines.h
-	nvcc home.cu porter.o similarity.o -arch=sm_20 -lhiredis -lm
-porter.o: porter.cpp
-	g++ -c porter.cpp
-similarity.o: similarity.cpp defines.h
-	g++ -c similarity.cpp
+FLAG = CPU
+
+search: page_rank.o mongo_def.o search.o
+	nvcc mongo_def.o page_rank.o search.o -o search -lmongoc
+
+search.o: search.cu mongo_def.h cuda_def.h
+	nvcc -c --save-temps search.cu -arch=sm_20 -DMONGO_HAVE_UNISTD
+
+page_rank.o: page_rank.cu cuda_def.o
+	nvcc -c cuda_def.o page_rank.cu -arch=sm_20
+
+mongo_def.o: mongo_def.h mongo_def.cpp
+	g++ -L/usr/local/lib -DMONGO_HAVE_UNISTD -g -c -Wno-write-strings mongo_def.cpp
+
+cuda_def.o: cuda_def.cu cuda_def.h
+	nvcc -c cuda_def.cu -D$(FLAG) -arch=sm_20
+
 clean:
-	rm -f *.o
-
-mongo:
-	g++ test_mongo.cpp -pthread -lmongoclient -lboost_thread-mt -lboost_filesystem -lboost_program_options -lboost_system
-
-test_similarity:
-	g++ -c similarity.cpp
-	g++ similarity.o porter.o -lhiredis -o chuck_norris
-	./chuck_norris
+	rm -f *.o search
