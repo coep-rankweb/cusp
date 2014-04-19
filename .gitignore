@@ -13,3 +13,7 @@ server/static/images
 *.swp
 query_proc/*.swp
 query_proc/.*
+intelligent
+classical
+mat*
+query_proc/.socket

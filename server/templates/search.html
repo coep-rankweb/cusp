@@ -1,14 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
-<form action="/search" method="GET" class="search-form">
+<form action="/" method="GET" class="search-form">
 	<table>
 		<tr><td><input type="text" placeholder="search..." name="q" autocomplete="off" value="{{ query }}"/></td>
 	<td><input type="submit" value="" /></td></tr></table>
 </form>
-<ul>
+<ul class="search_results">
 	{% if not results %}
 	No results found!
 	{% else %}
+	<div id="infobar">{{ num_results }} results in {{ time }} seconds</div>
 	{% for i in results %}
 	<li>
 		<a href="{{ i.url }}">{{ i.title }}</a>
@@ -17,15 +18,25 @@
 	{% endfor %}
 	{% endif %}
 </ul>
+<ul id="pagination">
+	{% if page != 1 %}
+	<li><a href="./?q={{ query }}&page={{ page - 1 }}">&laquo; Prev</a></li>
+	{% endif %}
+	{% if more_results %}
+	<li><a href="./?q={{ query }}&page={{ page + 1 }}">Next &raquo;</a></li>
+	{% endif %}
+</ul>
 {% endblock %}
 {% block js %}
+<!--
 <script>
 $("document").ready(
 	function() {
-		h = $("ul").html();
+		h = $("ul.search_results").html();
 		h = h.replace(/({{ query }})/gi, '<b>$1</b>');
-		$("ul").html(h);
+		$("ul.search_results").html(h);
 	}
 );
 </script>
+-->
 {% endblock %}

@@ -1,19 +1,19 @@
 <html>
 <style>
 body {
-	padding: 60px;
 	font-family: sans-serif;
+	padding: 0;
+	margin: 0;
 }
 
 input[type="text"] {
-	padding: 6px;
-	border: 2px solid gray;
+	padding: 10px;
+	border: 2px solid rgb(200, 200, 200);
 	border-radius: 3px;
 	outline: 0 none;
 	margin: 0;
 	width: 500px;
 	transition: border-color 0.2s linear;
-	height: 30px;
 }
 
 input[type="text"]:FOCUS {
@@ -26,13 +26,12 @@ input[type="submit"] {
 	background-position: 10px;
 	cursor: pointer;
 	width: 50px;
-	height: 30px;
 	margin: 0;
-	background-cover: cover;
-	background-repeat: no-repeat;*/
+	#background-cover: cover;
+	background-repeat: no-repeat;
 	color: white;
 	border-radius: 3px;
-	padding: 5px 10px;
+	padding: 12px 10px;
 	border: none;
 	transition: background-color 0.2s linear;
 	outline: 0 none;
@@ -55,12 +54,12 @@ ul {
 	list-style: none;
 	padding: 0;
 	margin: 0;
+	font-size: 12px;
 }
 
 ul li a {
-	font-size: 20px;
+	font-size: 15px;
 	color: rgb(30, 15, 190);
-	letter-spacing: 1px;
 	text-decoration: none;
 }
 
@@ -86,10 +85,39 @@ ul li {
 	margin: 0 auto;*/
 }
 
+#pagination li {
+	display: inline-block;
+}
+
+#pagination li:first-child {
+	margin-right: 10px;
+}
+
+#infobar {
+	color: rgb(150, 150, 150);
+}
+
+header {
+	background: rgb(55, 68, 72);
+	color: rgb(220, 220, 220);
+	padding: 20px;
+	margin-bottom: 20px;
+	font-weight: bold;
+}
+
+.container {
+	padding: 20px 50px;
+}
+
 </style>
 <body>
+<header>
+Deep Thought
+</header>
+<div class="container">
 {% block content %}
 {% endblock %}
+</div>
 <script src="/static/js/jquery-1.11.0.js"></script>
 {% block js %}
 {% endblock %}

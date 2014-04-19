@@ -84,7 +84,7 @@ class MongoDB {
 	mongo conn;
 	int url_count, word_count;
 
-	void find_one(MyBSON &query, MyBSON &field, MyBSON &res, char *col);
+	int find_one(MyBSON &query, MyBSON &field, MyBSON &res, char *col);
 public:
 	MongoDB(char *host = "127.0.0.1", int port = 27017) {
 		int status = mongo_client(&conn, host, port);
@@ -98,7 +98,9 @@ public:
 		}
 
 		url_count = int(mongo_count(&conn, "SPIDER_DB", "PROC_URL_DATA", NULL));
-		word_count = int(mongo_count(&conn, "SPIDER_DB", "PROC_WORD_DATA", NULL));
+		word_count = int(mongo_count(&conn, "SPIDER_DB", "WORD_DATA", NULL));
+		//url_count = 56858;
+		//word_count = 150795;
 	}
 	~MongoDB() {
 		mongo_destroy(&conn);
@@ -128,7 +130,7 @@ public:
 	void get_outlinks_from_urls(vector<Rank_Tuple> &urls, set<int> &induced);
 
 	// Get the dictionary of (word_id, freq) corresponding to url_id
-	void get_word_vec(int url_id, map<int, double> &word_vec);
+	int get_word_vec(int url_id, map<int, double> &word_vec);
 
 	// Get the url_names from the sorted vector of (id, rank) pairs in the given range
 	void get_url_names_from_ids(vector<Rank_Tuple> &url_id, vector<pair<string, string> > &url_names, int offset, int limit);
