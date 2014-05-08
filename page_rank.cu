@@ -9,7 +9,7 @@ using namespace std;
 
 void read_matrix(CAST(COO) &temp, const char *fname) {
 	cusp::io::read_matrix_market_file(temp, fname);
-	cerr << "Read the matrix\n";
+	//cerr << "Read the matrix\n";
 }
 
 void normalize(CAST(COO) &adj, CAST(ARR1D) &dangling) {
@@ -18,7 +18,7 @@ void normalize(CAST(COO) &adj, CAST(ARR1D) &dangling) {
 	cusp::detail::timer t;
 
 	cusp::multiply(adj, ones, sum);
-	cerr << "Row sum calculated.\n";
+	//cerr << "Row sum calculated.\n";
 
 	/*
 		instantiated an inversion_op (invert) for use in transform
@@ -26,22 +26,22 @@ void normalize(CAST(COO) &adj, CAST(ARR1D) &dangling) {
 	t.start();
 	inversion_op<double> invert = inversion_op<double>();
 	thrust::transform(sum.begin(), sum.end(), sum.begin(), invert);
-	cerr << "Inversion done.\n";
+	//cerr << "Inversion done.\n";
 
 	dangling_op<double> dangle = dangling_op<double>();
 	thrust::transform(sum.begin(), sum.end(), dangling.begin(), dangle);
-	cerr << "Dangling nodes found.\n";
+	//cerr << "Dangling nodes found.\n";
 
 	CAST(COO) link_mat = adj;
 	cusp::transpose(adj, link_mat);
 	adj = link_mat;
-	cerr << "Transpose calculated.\n";
+	//cerr << "Transpose calculated.\n";
 
 	CAST(COO) dia(adj.num_rows, adj.num_rows, adj.num_rows);
 	thrust::sequence(dia.row_indices.begin(), dia.row_indices.end());
 	thrust::sequence(dia.column_indices.begin(), dia.column_indices.end());
 	thrust::copy(sum.begin(), sum.end(), dia.values.begin());
-	cerr << "Diagonal Matrix Formed.\n";
+	//cerr << "Diagonal Matrix Formed.\n";
 
 	if(cusp::is_valid_matrix(adj)) {
 		cusp::multiply(adj, dia, link_mat);	// link_mat = adj * dia
@@ -50,8 +50,8 @@ void normalize(CAST(COO) &adj, CAST(ARR1D) &dangling) {
 			cout << "Invalid format!" << endl;
 			exit(1);
 	}
-	cerr << "Normalized\n";
-	cerr << "TIME:NORMAL: " << t.milliseconds_elapsed() << endl;
+	//cerr << "Normalized\n";
+	cerr << "NORMAL: " << t.milliseconds_elapsed() << endl;
 }
 
 void print_array(CAST(ARR1D) rank) {
@@ -93,25 +93,30 @@ void pagerank(CAST(COO) &link, double beta, CAST(ARR1D) &rank, CAST(ARR1D) &dang
 		prev_rank = rank;
 
 	} while(1);
-	cerr << "TIME:PR: " << t.milliseconds_elapsed() << endl;
+	cerr << "PR: " << t.milliseconds_elapsed() << endl;
 }
 
 int main(int argc, char **argv) {
 	CAST(COO) adj;
 	read_matrix(adj, argv[1]);
 
-	struct timeval start, end;
+	//struct timeval start, end;
 
 	CAST(ARR1D) rank(adj.num_rows);
 	CAST(ARR1D) dangling(adj.num_rows);
 
-	gettimeofday(&start, NULL);
 	normalize(adj, dangling);
-
 	pagerank(adj, atof(argv[2]), rank, dangling);
-	gettimeofday(&end, NULL);
 
-	cerr << "TIME: " << end.tv_sec - start.tv_sec << "." << end.tv_usec - start.tv_usec << endl;
+	//gettimeofday(&start, NULL);
+	//for(int i = 0; i < 20; i++) {
+	//	cout << "iteration: " << i << endl;
+	//	normalize(adj, dangling);
+	//	pagerank(adj, atof(argv[2]), rank, dangling);
+	//}
+	//gettimeofday(&end, NULL);
+
+	//cerr << "TIME: " << end.tv_sec - start.tv_sec << "." << end.tv_usec - start.tv_usec << endl;
 	print_array(rank);
 	return 0;
 }

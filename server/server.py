@@ -4,6 +4,7 @@ from unidecode import unidecode
 import redis
 import time
 import random
+import inflect
 
 QUERY_PIPE = "/home/nvidia/query_pipe"
 RESULT_PIPE = "/home/nvidia/result_pipe"
@@ -14,6 +15,7 @@ f = open(QUERY_PIPE, "w")
 g = open(RESULT_PIPE ,"r")
 
 r = redis.Redis()
+engine = inflect.engine()
 
 '''
 def get_search_results(q):
@@ -32,20 +34,31 @@ def get_search_results(q):
 def generate_id():
 	return str(int(random.random() * time.time()) % 1000)
 
-def fetch_results(query, _id, page = 1):
-	cached_result = r.get("QCACHE:%s:%s" % (_id, query))
-	if cached_result:
-		res = eval(cached_result)
-		return res[10 * (page - 1) : 10 * page], len(res)
+def singularize(string):
+	s = []
+	for i in string.split():
+		t = engine.singular_noun(i)
+		s.append(t if t else i)
+	return " ".join(s)
+
+def fetch_results(query, _id, page=1, allow_caching=True):
+	print query
+	query = singularize(query)
+	if allow_caching:
+		cached_result = r.get("QCACHE:%s:%s" % (_id, query))
+		if cached_result:
+			res = eval(cached_result)
+			return res[10 * (page - 1) : 10 * page], len(res)
+	f.write(query + "\n")
+	f.flush()
+	s = g.read()
+	if s:
+		res = [dict(zip(["url", "title"], map(clean, i.split("<@@@>")))) for i in s.split("<###>")]
 	else:
-		f.write(query + "\n")
-		f.flush()
-		s = g.read()
-		if s:
-			res = [dict(zip(["url", "title"], map(clean, i.split("<@@@>")))) for i in s.split("<###>")]
-		else:
-			return [], 0
-		r.set("QCACHE:%s:%s" % (_id, query), str(res))
+		print "nothing to read!"
+		return [], 0
+	r.set("QCACHE:%s:%s" % (_id, query), str(res))
+	print res
 	return res[10 * (page - 1) : 10 * page], len(res)
 
 def clean(s):
@@ -71,10 +84,10 @@ def search():
 		response.set_cookie('_id', _id)
 
 	start = time.time()
-	res, total_len = fetch_results(query, _id, page)
+	res, total_len = fetch_results(query, _id, page, allow_caching=False)
 	end = time.time()
 	r = render_template('search.html', results = res, query = query, page = int(page), num_results = total_len, more_results = (page * 10 < total_len), time = end - start)
 	response.set_data(r)
 	return response
 
-app.run(debug = True, host = "0.0.0.0")
+#app.run(debug = True, host = "0.0.0.0")

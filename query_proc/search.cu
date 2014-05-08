@@ -85,11 +85,13 @@ void get_doc_kwd_matrix(MongoDB &mongo, set<int> &urls, CAST(COO) &kwd) {
 		prev += word_freq.size();
 	}
 
-	cerr << "NNZ(prev): " << prev << endl;
+	// cerr << "NNZ(prev): " << prev << endl;
 
 	// Not sure
 	//cout << "INV\n";
 	kwd.resize(kwd.num_rows, kwd.num_cols, prev);
+	// cout << kwd.num_rows << ", " << kwd.num_cols << ", " << prev << endl;
+	// cusp::print(kwd);
 	if(!is_valid_matrix(kwd, cerr)) {
 		cerr << "Invalid Matrix\n";
 	}
@@ -142,10 +144,10 @@ int get_intelligent_mat(MongoDB &mongo, CAST(COO) &adj, CAST(COO) &link, string 
 			return -1;
 
 		mongo.get_urls_from_words(words, url_rank);
-		cerr << "Got the base urls: " << url_rank.size() << endl;
+		// cerr << "Got the base urls: " << url_rank.size() << endl;
 		mongo.get_final_ranks(url_rank);
 		mongo.get_outlinks_from_urls(url_rank, urls);
-		cerr << "Got the induced urls: " << urls.size() << endl;
+		// cerr << "Got the induced urls: " << urls.size() << endl;
 	}
 
 	CAST(ARR1D) rel_vec(mongo.get_url_count());
@@ -154,17 +156,17 @@ int get_intelligent_mat(MongoDB &mongo, CAST(COO) &adj, CAST(COO) &link, string 
 		CAST(ARR1D) word_vec(mongo.get_word_count(), 0);
 		//CAST(COO) word_vec(mongo.get_word_count(), 1, words.size());
 		get_kwd_vector(words, word_vec);
-		cerr << "Got Query Vector\n";
+		// cerr << "Got Query Vector\n";
 
 		// nnz are not correct
 		CAST(COO) kwd(mongo.get_url_count(), mongo.get_word_count(), 1000000);
 		get_doc_kwd_matrix(mongo, urls, kwd);
-		cerr << "Got doc_kwd matrix\n";
+		// cerr << "Got doc_kwd matrix\n";
 		//cusp::print(kwd);
 
 		// TODO: check rel_vec dimension
 		get_relevance_vector(kwd, word_vec, rel_vec);
-		cerr << "Got cosine distances\n";
+		// cerr << "Got cosine distances\n";
 	}
 
 	//cusp::print(rel_vec);
@@ -184,7 +186,7 @@ int main(int argc, char **argv) {
 	double beta;
 
 	if(argc != 3) {
-		cerr << "Usage: " << argv[0] << " <web_graph> <beta>" << endl;
+		// cerr << "Usage: " << argv[0] << " <web_graph> <beta>" << endl;
 		return 1;
 	}
 
@@ -203,6 +205,29 @@ int main(int argc, char **argv) {
 		CAST(ARR1D) dangling(adj.num_rows), rank(adj.num_rows);
 		set<int> urls;
 
+
+		// BEGIN TESTING:
+		//FILE *f = fopen("../server/random_queries", "r");
+		//char buf[1024];
+		//int l;
+		//cusp::detail::timer tim;
+		//cout << "subgraph\tpagerank" << endl;
+		//while(fgets(buf, 1024, f)) {
+		//	l = strlen(buf);
+		//	buf[l - 1] = '\0';
+		//	cerr << buf << endl;
+		//	query = buf;
+		//	tim.start();
+		//	retval = get_intelligent_mat(mongo, adj, link, query, urls, dangling);
+		//	cout << tim.milliseconds_elapsed() << "\t";
+		//	tim.start();
+		//	pagerank(link, beta, rank, dangling);
+		//	cout << tim.milliseconds_elapsed() << endl;
+		//}
+		//fclose(f);
+		//break;
+		// END TESTING (delete when done)
+
 		ifstream query_fifo;
 		ofstream result_fifo;
 		query_fifo.open(QUERY_PIPE, ifstream::in);
@@ -210,10 +235,12 @@ int main(int argc, char **argv) {
 
 		result_fifo.rdbuf()->pubsetbuf(0, 0);
 
-		cerr << "Query: ";
-		getline(query_fifo, query);
+		// cerr << "Query: ";
+		getline(query_fifo, query);	// got the query here
 		if(!query_fifo.good())
 			break;
+		cusp::detail::timer t;
+		t.start();
 
 		/*
 		if (cin.eof()) {
@@ -221,6 +248,7 @@ int main(int argc, char **argv) {
 			break;
 		}*/
 
+		// getting subgraph here (with cosine transition probs)
 
 		retval = get_intelligent_mat(mongo, adj, link, query, urls, dangling);
 		if (retval == -1) {
@@ -228,7 +256,10 @@ int main(int argc, char **argv) {
 			result_fifo.close();
 			continue;
 		}
+
+		// calculating pagerank here
 		pagerank(link, beta, rank, dangling);
+		// cerr << "TIME: " << t.milliseconds_elapsed() << endl;
 
 		ARR1D_CPU cpu_rank = rank;
 		vector<Rank_Tuple> url_rank;
@@ -240,11 +271,9 @@ int main(int argc, char **argv) {
 		vector<pair<string, string> > result;
 		mongo.get_url_names_from_ids(url_rank, result, 0, 99);
 
-		for(int i = 0; i < result.size(); i++) {
-			//result_fifo << "hello" << endl << "goodbye" << endl << endl;
+		for(int i = 0; i < result.size(); i++)
 			result_fifo << result[i].first << "<@@@>" << result[i].second << "<###>";
-		}
-		cerr << "Done writing to FIFO" << endl;
+		// cerr << "Done writing to FIFO" << endl;
 
 		query_fifo.close();
 		result_fifo.close();

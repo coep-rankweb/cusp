@@ -6,9 +6,9 @@
 	<td><input type="submit" value="" /></td></tr></table>
 </form>
 <ul class="search_results">
-	{% if not results %}
+	{% if not results and query %}
 	No results found!
-	{% else %}
+	{% elif query %}
 	<div id="infobar">{{ num_results }} results in {{ time }} seconds</div>
 	{% for i in results %}
 	<li>

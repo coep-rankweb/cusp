@@ -21,6 +21,8 @@
 
 #define LIM	200
 
+#define DBNAME	"SPIDER_DB"
+
 using namespace std;
 
 typedef pair<int, double> Rank_Tuple;
@@ -97,10 +99,10 @@ public:
 			}
 		}
 
-		url_count = int(mongo_count(&conn, "SPIDER_DB", "PROC_URL_DATA", NULL));
-		word_count = int(mongo_count(&conn, "SPIDER_DB", "WORD_DATA", NULL));
+		url_count = int(mongo_count(&conn, DBNAME, "PROC_URL_DATA", NULL));
+		//word_count = int(mongo_count(&conn, "SPIDER_DB", "WORD_DATA", NULL));
 		//url_count = 56858;
-		//word_count = 150795;
+		word_count = 197673;
 	}
 	~MongoDB() {
 		mongo_destroy(&conn);

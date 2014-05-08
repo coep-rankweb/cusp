@@ -131,7 +131,7 @@ int MongoDB::get_wordid(string &token) {
 	field.finish();
 	query.bson_append("word", token);
 	query.finish();
-	if (find_one(query, field, res, "SPIDER_DB.PROC_WORD_DATA") == MONGO_ERROR) {
+	if (find_one(query, field, res, DBNAME".PROC_WORD_DATA") == MONGO_ERROR) {
 		// token not found.
 		return -1;
 	}
@@ -175,7 +175,7 @@ void MongoDB::get_urls_from_words(vector<int> &words, vector<Rank_Tuple> &url_ra
 		// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		query.bson_append("_id", words[i] + 1);	// words contain base 0 ids
 		query.finish();
-		if (find_one(query, field, res, "SPIDER_DB.PROC_WORD_DATA") == MONGO_ERROR)
+		if (find_one(query, field, res, DBNAME".PROC_WORD_DATA") == MONGO_ERROR)
 			continue;
 		
 		// queries return base 1 ids
@@ -206,7 +206,7 @@ void MongoDB::get_final_ranks(vector<Rank_Tuple> &url_rank) {
 		// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		query.bson_append("_id", it->first + 1); //get base 1 id
 		query.finish();
-		if (find_one(query, field, res, "SPIDER_DB.PROC_URL_DATA") == MONGO_ERROR)
+		if (find_one(query, field, res, DBNAME".PROC_URL_DATA") == MONGO_ERROR)
 			continue;
 
 		if(res.getValue(rank, "rank") == -1)
@@ -223,7 +223,7 @@ void MongoDB::get_outlinks_from_urls(vector<Rank_Tuple> &urls, set<int> &induced
 	int i;
 
 	field.bson_append("out_links", 1);
-	field.bson_append("in_links", 1);
+	//field.bson_append("in_links", 1);
 	field.finish();
 	for(i = 0; i < urls.size() && i < LIM; i++) {
 		MyBSON res;
@@ -232,11 +232,11 @@ void MongoDB::get_outlinks_from_urls(vector<Rank_Tuple> &urls, set<int> &induced
 		// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		query.bson_append("_id", urls[i].first + 1);	// get base 1 id
 		query.finish();
-		if (find_one(query, field, res, "SPIDER_DB.PROC_URL_DATA") == MONGO_ERROR)
+		if (find_one(query, field, res, DBNAME".PROC_URL_DATA") == MONGO_ERROR)
 			continue;
 
 		res.getArray(induced, "out_links");
-		res.getArray(induced, "in_links");
+		//res.getArray(induced, "in_links");
 	}
 	for(; i < urls.size(); i++)
 		induced.insert(urls[i].first);
@@ -251,7 +251,7 @@ int MongoDB::get_word_vec(int url_id, map<int, double> &word_vec) {
 	query.bson_append("_id", url_id + 1); // get base 1 id
 	query.finish();
 
-	if (find_one(query, field, res, "SPIDER_DB.PROC_URL_DATA") == MONGO_ERROR)
+	if (find_one(query, field, res, DBNAME".PROC_URL_DATA") == MONGO_ERROR)
 		return -1;
 
 	res.getDictArray(word_vec, "word_vec", "word", "score");
@@ -273,7 +273,7 @@ void MongoDB::get_url_names_from_ids(vector<Rank_Tuple> &url_id, vector<pair<str
 		// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		query.bson_append("_id", url_id[i].first + 1);	// get base 1 id
 		query.finish();
-		if (find_one(query, field, res, "SPIDER_DB.PROC_URL_DATA") == MONGO_ERROR)
+		if (find_one(query, field, res, DBNAME".PROC_URL_DATA") == MONGO_ERROR)
 			continue;
 
 		if(res.getValue(temp, "url") == -1)
